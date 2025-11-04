@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %} — Archive{% endblock %}
+{% block content %}
+<section class="archive">
+  <h2>Daily Archive</h2>
+  {% for date, items in grouped.items() %}
+    <details>
+      <summary>{{ date.strftime('%B %d, %Y') }} ({{ items|length }} items)</summary>
+      <ul>
+        {% for item in items %}
+          <li>
+            <a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+            <span class="meta">{{ item.type|title }} &middot; {{ item.venue or 'Unspecified venue' }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </details>
+  {% endfor %}
+</section>
+{% endblock %}

@@ -1,0 +1,9 @@
+requests
+feedparser
+pydantic
+jinja2
+pandas
+markdown
+beautifulsoup4
+tenacity
+python-dateutil

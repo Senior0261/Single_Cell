@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>{{ site_title }}</title>
+    <link>{{ site_url }}</link>
+    <description>{{ site_description }}</description>
+    <lastBuildDate>{{ generated.strftime('%a, %d %b %Y %H:%M:%S +0000') }}</lastBuildDate>
+    {% for item in latest %}
+    <item>
+      <title>{{ item.title }}</title>
+      <link>{{ item.url }}</link>
+      <description>{{ item.summary }}</description>
+      {% if item.published %}<pubDate>{{ item.published }}</pubDate>{% endif %}
+      <guid isPermaLink="false">{{ item.source }}::{{ item.url }}</guid>
+    </item>
+    {% endfor %}
+  </channel>
+</rss>
