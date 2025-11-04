@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ site_title }}{% block title %}{% endblock %}</title>
+  <meta name="description" content="{{ site_description }}" />
+  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="{{ site_url }}/feed.xml" />
+  <script>
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme) {
+      document.documentElement.dataset.theme = storedTheme;
+    }
+    function toggleTheme() {
+      const nextTheme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = nextTheme;
+      localStorage.setItem('theme', nextTheme);
+    }
+  </script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1><a href="/">{{ site_title }}</a></h1>
+      <p class="tagline">{{ site_description }}</p>
+      <button class="theme-toggle" onclick="toggleTheme()">Toggle theme</button>
+      <nav>
+        <a href="/archive.html">Archive</a>
+        <a href="/tags.html">Tags</a>
+        <a href="/feed.xml">RSS</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">
+    <div class="container">
+      <p>Updated daily at 07:00 America/Los_Angeles via GitHub Actions.</p>
+      <p>&copy; {{ site_title }}. Built with love for the single-cell community.</p>
+    </div>
+  </footer>
+  <script>
+    async function performSearch(event) {
+      event.preventDefault();
+      const term = document.getElementById('search-term').value.toLowerCase();
+      const resultsContainer = document.getElementById('search-results');
+      resultsContainer.innerHTML = '';
+      if (!term) {
+        return;
+      }
+      const response = await fetch('assets/search-index.json');
+      const entries = await response.json();
+      const matches = entries.filter(entry =>
+        entry.title.toLowerCase().includes(term) ||
+        entry.summary.toLowerCase().includes(term) ||
+        entry.tags.toLowerCase().includes(term)
+      );
+      if (matches.length === 0) {
+        resultsContainer.innerHTML = '<p>No results found.</p>';
+        return;
+      }
+      const list = document.createElement('ul');
+      matches.forEach(entry => {
+        const item = document.createElement('li');
+        item.innerHTML = `<a href="${entry.url}" target="_blank" rel="noopener">${entry.title}</a> - ${entry.summary}`;
+        list.appendChild(item);
+      });
+      resultsContainer.appendChild(list);
+    }
+  </script>
+</body>
+</html>

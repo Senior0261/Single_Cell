@@ -1,0 +1,79 @@
+name: Daily update
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 15 * * *"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch sources
+        env:
+          CROSSREF_MAILTO: ${{ secrets.CROSSREF_MAILTO }}
+          GH_READ_TOKEN: ${{ secrets.GH_READ_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/fetch_sources.py --days 7
+
+      - name: Build site
+        env:
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
+        run: |
+          BASE_URL="${SITE_BASE_URL}"
+          if [ -z "$BASE_URL" ]; then
+            REPO_NAME="${GITHUB_REPOSITORY#*/}"
+            BASE_URL="https://${GITHUB_REPOSITORY_OWNER}.github.io/${REPO_NAME}"
+          fi
+          SITE_BASE_URL="$BASE_URL" python scripts/summarize_and_build.py --window 30
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git status
+          if [ -n "$(git status --porcelain)" ]; then
+            git add .
+            git commit -m "chore: daily data refresh"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %} — Tags{% endblock %}
+{% block content %}
+<section class="tags">
+  <h2>Browse by Tag</h2>
+  {% for tag, items in tags.items() %}
+    <article class="tag-group" id="{{ tag|slugify }}">
+      <h3>{{ tag }} ({{ items|length }})</h3>
+      <ul>
+        {% for item in items %}
+          <li>
+            <a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a>
+            <span class="meta">{{ item.type|title }} &middot; {{ item.venue or 'Unspecified venue' }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </article>
+  {% endfor %}
+</section>
+{% endblock %}

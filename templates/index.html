@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %} — Latest Highlights{% endblock %}
+{% block content %}
+<section class="search">
+  <form onsubmit="performSearch(event)">
+    <label for="search-term">Search the archive</label>
+    <div class="search-control">
+      <input id="search-term" type="search" placeholder="Find papers, tools, datasets" />
+      <button type="submit">Search</button>
+    </div>
+  </form>
+  <div id="search-results"></div>
+</section>
+<section class="highlights">
+  <h2>Latest Highlights</h2>
+  {% if latest %}
+    {% for item in latest %}
+      <article class="card">
+        <header>
+          <h3><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a></h3>
+          <p class="meta">{{ item.type|title }} &middot; {{ item.venue or 'Unspecified venue' }}</p>
+        </header>
+        <p class="summary">{{ item.summary }}</p>
+        <p class="why">Why it matters: {{ item.why_it_matters }}</p>
+        <p class="details">
+          <span>Authors: {{ item.authors|join(", ") }}</span>
+          {% if item.doi %}<span>DOI: <a href="https://doi.org/{{ item.doi }}">{{ item.doi }}</a></span>{% endif %}
+          <span>Tags: {% for tag in item.tags %}<span class="tag">{{ tag }}</span>{% endfor %}</span>
+        </p>
+      </article>
+    {% endfor %}
+  {% else %}
+    <p>No highlights available yet. Check back soon!</p>
+  {% endif %}
+</section>
+{% endblock %}
